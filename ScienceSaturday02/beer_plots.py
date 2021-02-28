@@ -25,13 +25,31 @@ data_dir = '/Users/rplesha/Desktop/random_scripts/ScienceSaturday/data'
 
 df_order = pd.read_csv(os.path.join(data_dir, 'SS2_beerOrder.csv'))
 df_ratings = pd.read_csv(os.path.join(data_dir, 'SS2_beerScores.csv'))
+avg_rating = df_ratings.mean(axis=1)
+std_rating = df_ratings.std(axis=1)
+
+modified_df = df_ratings
+modified_df['avg_rating'] = avg_rating
+modified_df['std_rating'] = std_rating
+
+modified_df = modified_df.sort_values('avg_rating')
 
 ratings_only = df_ratings.drop(columns='Beer_Letter')
 
-fig = px.scatter(df_ratings, y=df_ratings.mean(axis=1), size=df_ratings.std(axis=1), error_y=df_ratings.std(axis=1))#, #color=ratings_only.mean(axis=1))
+fig = px.scatter(modified_df,
+                 x=modified_df.Beer,
+                 y=modified_df.avg_rating,
+                 size=modified_df.std_rating,
+                 color=modified_df.avg_rating,
+                 labels=dict(avg_rating='Average Rating',
+                             std_rating='Standard Deviation'),
+                 error_y=modified_df.std_rating,
+                 hover_data=[key for key in df_ratings.keys() if 'Beer' not in key]
+                 )
 
 #fig = px.scatter(ratings_only, y=ratings_only.mean(axis=1), size=ratings_only.std(axis=1), error_y=ratings_only.std(axis=1))#, #color=ratings_only.mean(axis=1))
-fig.show()
+#fig.show()
+fig.write_html('beer_averages.html')
 
 # beer_order = []
 # beer = []
